@@ -29,7 +29,7 @@ def sackin_index(tree):
     return _sackin_index(tree.virtual_root, tree.left_child_array, tree.right_sib_array)
 
 
-@numba.njit
+@numba.njit(cache=True)
 def _colless_index(postorder, left_child, right_sib):
     """
     Returns the Colless imbalance index of the tree.
@@ -41,7 +41,7 @@ def _colless_index(postorder, left_child, right_sib):
     :rtype : float
     """
     num_leaves = np.zeros_like(left_child)
-    total = 0
+    total = 0.0
     for u in postorder:
         v = left_child[u]
         num_children = 0
@@ -83,7 +83,7 @@ def colless_index(tree):
     return _colless_index(tree.postorder(), tree.left_child_array, tree.right_sib_array)
 
 
-@numba.njit(cached=True)
+@numba.njit(cache=True)
 def _b1_index(postorder, left_child, right_sib, parent):
     """
     Returns the B1 balance index of the tree.
@@ -96,7 +96,7 @@ def _b1_index(postorder, left_child, right_sib, parent):
     :rtype : float
     """
     max_path_length = np.zeros_like(postorder)
-    total = 0
+    total = 0.0
     for u in postorder:
         v = left_child[u]
         if parent[u] != -1 and v != -1:
