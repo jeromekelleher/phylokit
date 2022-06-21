@@ -19,11 +19,11 @@ class TestBalancedBinaryOdd:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 5
 
-    # def test_colless(self):
-    #     assert self.tree().colless_index() == 1
+    def test_colless(self):
+        assert pk.colless_index(self.tree()) == 1
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 1
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 1
 
 
 class TestBalancedBinaryEven:
@@ -39,11 +39,11 @@ class TestBalancedBinaryEven:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 8
 
-    # def test_colless(self):
-    #     assert self.tree().colless_index() == 0
+    def test_colless(self):
+        assert pk.colless_index(self.tree()) == 0
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 2
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 2
 
 
 class TestBalancedTernary:
@@ -59,12 +59,12 @@ class TestBalancedTernary:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 18
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 3
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 3
 
 
 class TestStarN10:
@@ -78,12 +78,12 @@ class TestStarN10:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 10
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 0
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 0
 
 
 class TestCombN5:
@@ -103,11 +103,11 @@ class TestCombN5:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 14
 
-    # def test_colless(self):
-    #     assert self.tree().colless_index() == 6
+    def test_colless(self):
+        assert pk.colless_index(self.tree()) == 6
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == pytest.approx(1.833, rel=1e-3)
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == pytest.approx(1.833, rel=1e-3)
 
 
 class TestMultiRootBinary:
@@ -131,12 +131,12 @@ class TestMultiRootBinary:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 20
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 4.5
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 4.5
 
 
 class TestEmpty:
@@ -147,12 +147,12 @@ class TestEmpty:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 0
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 0
 
 
 class TestTreeInNullState:
@@ -164,12 +164,12 @@ class TestTreeInNullState:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 0
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 0
 
 
 class TestAllRootsN5:
@@ -182,9 +182,9 @@ class TestAllRootsN5:
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0
 
-    # def test_colless(self):
-    #     with pytest.raises(ValueError):
-    #         self.tree().colless_index()
+    def test_colless(self):
+        with pytest.raises(ValueError):
+            pk.colless_index(self.tree())
 
-    # def test_b1(self):
-    #     assert self.tree().b1_index() == 0
+    def test_b1(self):
+        assert pk.b1_index(self.tree()) == 0
