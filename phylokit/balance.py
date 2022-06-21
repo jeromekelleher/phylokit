@@ -31,15 +31,6 @@ def sackin_index(tree):
 
 @numba.njit(cache=True)
 def _colless_index(postorder, left_child, right_sib):
-    """
-    Returns the Colless imbalance index of the tree.
-
-    :param numpy.ndarray postorder: The postorder traversal of the tree.
-    :param numpy.ndarray left_child: The left child array of the tree.
-    :param numpy.ndarray right_sib: The right sibling array of the tree.
-    :return : The Colless index of the tree.
-    :rtype : float
-    """
     num_leaves = np.zeros_like(left_child)
     total = 0.0
     for u in postorder:
@@ -75,26 +66,11 @@ def colless_index(tree):
     """
     if tree.num_roots != 1:
         raise ValueError("Colless index not defined for multiroot trees")
-    # TODO check tree.is_binary, somehow
-    # for n in tree.postorder():
-    #     if len(tree.children(n)) > 2:
-    #         raise ValueError("Colless index not defined for nonbinary trees")
-
     return _colless_index(tree.postorder(), tree.left_child_array, tree.right_sib_array)
 
 
 @numba.njit(cache=True)
 def _b1_index(postorder, left_child, right_sib, parent):
-    """
-    Returns the B1 balance index of the tree.
-
-    :param numpy.ndarray postorder: The postorder traversal of the tree.
-    :param numpy.ndarray left_child: The left child array of the tree.
-    :param numpy.ndarray right_sib: The right sibling array of the tree.
-    :param numpy.ndarray parent: The parent array of the tree.
-    :return : The B1 index of the tree.
-    :rtype : float
-    """
     max_path_length = np.zeros_like(postorder)
     total = 0.0
     for u in postorder:
