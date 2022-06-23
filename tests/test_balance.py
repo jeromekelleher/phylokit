@@ -25,6 +25,9 @@ class TestBalancedBinaryOdd:
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 1
 
+    def test_b2(self):
+        assert pk.b2_index(self.tree()) == pytest.approx(0.4515, rel=1e-3)
+
 
 class TestBalancedBinaryEven:
     # 2.00┊    6    ┊
@@ -44,6 +47,34 @@ class TestBalancedBinaryEven:
 
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 2
+
+    def test_b2(self):
+        assert pk.b2_index(self.tree()) == pytest.approx(0.602, rel=1e-3)
+
+    @pytest.mark.parametrize(
+        ("base", "expected"),
+        [
+            (2, 2),
+            (3, 1.2618595071429148),
+            (4, 1.0),
+            (5, 0.8613531161467861),
+            (10, 0.6020599913279623),
+            (100, 0.30102999566398114),
+            (1000000, 0.10034333188799373),
+            (2.718281828459045, 1.3862943611198906),
+        ],
+    )
+    def test_b2_base(self, base, expected):
+        assert pk.b2_index(self.tree(), base) == expected
+
+    @pytest.mark.parametrize("base", [0, -0.001, -1, -1e-6, -1e200])
+    def test_b2_bad_base(self, base):
+        with pytest.raises(ValueError, match="math domain"):
+            pk.b2_index(self.tree(), base=base)
+
+    def test_b2_base1(self):
+        with pytest.raises(ZeroDivisionError):
+            pk.b2_index(self.tree(), base=1)
 
 
 class TestBalancedTernary:
@@ -66,6 +97,9 @@ class TestBalancedTernary:
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 3
 
+    def test_b2(self):
+        assert pk.b2_index(self.tree()) == pytest.approx(0.954, rel=1e-3)
+
 
 class TestStarN10:
     # 1.00┊         10          ┊
@@ -84,6 +118,9 @@ class TestStarN10:
 
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 0
+
+    def test_b2(self):
+        assert pk.b2_index(self.tree()) == pytest.approx(0.9999, rel=1e-3)
 
 
 class TestCombN5:
@@ -108,6 +145,9 @@ class TestCombN5:
 
     def test_b1(self):
         assert pk.b1_index(self.tree()) == pytest.approx(1.833, rel=1e-3)
+
+    def test_b2(self):
+        assert pk.b2_index(self.tree(), base=10) == pytest.approx(0.564, rel=1e-3)
 
 
 class TestMultiRootBinary:
@@ -138,6 +178,10 @@ class TestMultiRootBinary:
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 4.5
 
+    def test_b2(self):
+        with pytest.raises(ValueError):
+            pk.b2_index(self.tree())
+
 
 class TestEmpty:
     def tree(self):
@@ -153,6 +197,10 @@ class TestEmpty:
 
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 0
+
+    def test_b2(self):
+        with pytest.raises(ValueError):
+            pk.b2_index(self.tree())
 
 
 class TestTreeInNullState:
@@ -171,6 +219,10 @@ class TestTreeInNullState:
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 0
 
+    def test_b2(self):
+        with pytest.raises(ValueError):
+            pk.b2_index(self.tree())
+
 
 class TestAllRootsN5:
     def tree(self):
@@ -188,3 +240,7 @@ class TestAllRootsN5:
 
     def test_b1(self):
         assert pk.b1_index(self.tree()) == 0
+
+    def test_b2(self):
+        with pytest.raises(ValueError):
+            pk.b2_index(self.tree())
