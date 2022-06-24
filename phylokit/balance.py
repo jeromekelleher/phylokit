@@ -1,10 +1,11 @@
 # Tree balance/imbalance metrics.
 
+import math
 import numba
 import numpy as np
 
 
-@numba.njit()
+@numba.njit(cache=True)
 def _sackin_index(virtual_root, left_child, right_sib):
     stack = []
     root = left_child[virtual_root]
@@ -26,6 +27,16 @@ def _sackin_index(virtual_root, left_child, right_sib):
 
 
 def sackin_index(tree):
+    """
+    Returns the Sackin imbalance index for this tree.
+
+    .. seealso::
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+
+    :param tskit.Tree tree: The tree to compute the Sackin index of.
+    :return : The Sackin index of the tree.
+    :rtype : float
+    """
     return _sackin_index(tree.virtual_root, tree.left_child_array, tree.right_sib_array)
 
 
@@ -96,4 +107,60 @@ def b1_index(tree):
     """
     return _b1_index(
         tree.postorder(), tree.left_child_array, tree.right_sib_array, tree.parent_array
+    )
+
+
+@numba.njit(cache=True)
+def general_log(x, base):
+    """
+    Compute the logarithm of x in base `base`.
+
+    :param x: The number to compute the logarithm of.
+    :param base: The base of the logarithm.
+    :return: The logarithm of x in base `base`.
+    :rtype: float
+    """
+    return math.log(x) / math.log(base)
+
+
+@numba.njit(cache=True)
+def _b2_index(virtual_root, left_child, right_sib, base):
+    root = left_child[virtual_root]
+    stack = [(root, 1)]
+    total_proba = 0.0
+    while len(stack) > 0:
+        u, path_product = stack.pop()
+        if left_child[u] == -1:
+            total_proba -= path_product * general_log(path_product, base)
+        else:
+            num_children = 0
+            v = left_child[u]
+            while v != -1:
+                num_children += 1
+                v = right_sib[v]
+            path_product *= 1 / num_children
+            v = left_child[u]
+            while v != -1:
+                stack.append((v, path_product))
+                v = right_sib[v]
+    return total_proba
+
+
+def b2_index(tree, base=10):
+    """
+    Returns the B2 balance index for this tree.
+
+    .. seealso::
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+
+    :param tskit.Tree tree: The tree to compute the B2 index of.
+    :param int base: The base of the logarithm used to compute the B2 index in the Shannon entropy computation.
+    :return : The B2 index of the tree.
+    :rtype : float
+    """
+    if tree.num_roots != 1:
+        raise ValueError("B2 index not defined for multiroot trees")
+    math.log(10, base)  # Check that base is valid
+    return _b2_index(
+        tree.virtual_root, tree.left_child_array, tree.right_sib_array, base
     )
