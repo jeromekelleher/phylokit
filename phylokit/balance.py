@@ -38,7 +38,9 @@ def sackin_index(tree):
     :return : The Sackin index of the tree.
     :rtype : float
     """
-    return _sackin_index(tree.virtual_root, tree.left_child_array, tree.right_sib_array)
+    return _sackin_index(
+        tree.virtual_root, tree.left_child_array, tree.right_sib_array
+    )
 
 
 @numba.njit(cache=True)
@@ -80,7 +82,9 @@ def colless_index(tree):
     """
     if tree.num_roots != 1:
         raise ValueError("Colless index not defined for multiroot trees")
-    return _colless_index(tree.postorder(), tree.left_child_array, tree.right_sib_array)
+    return _colless_index(
+        tree.postorder(), tree.left_child_array, tree.right_sib_array
+    )
 
 
 @numba.njit(cache=True)
@@ -110,7 +114,10 @@ def b1_index(tree):
     :rtype : float
     """
     return _b1_index(
-        tree.postorder(), tree.left_child_array, tree.right_sib_array, tree.parent_array
+        tree.postorder(),
+        tree.left_child_array,
+        tree.right_sib_array,
+        tree.parent_array,
     )
 
 
