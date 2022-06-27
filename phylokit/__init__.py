@@ -6,6 +6,9 @@ from .convert import from_newick  # NOQA
 from .convert import from_tskit  # NOQA
 from .convert import to_newick  # NOQA
 from .convert import to_tskit  # NOQA
+from .distance import branch_length
+from .distance import kc_distance
+from .distance import mrca
 
 __all__ = [
     "sackin_index",
@@ -16,4 +19,7 @@ __all__ = [
     "from_newick",
     "to_tskit",
     "to_newick",
+    "mrca",
+    "branch_length",
+    "kc_distance",
 ]
