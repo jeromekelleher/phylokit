@@ -1,6 +1,6 @@
 # Tree balance/imbalance metrics.
-
 import math
+
 import numba
 import numpy as np
 
@@ -31,7 +31,8 @@ def sackin_index(tree):
     Returns the Sackin imbalance index for this tree.
 
     .. seealso::
-        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
+        details.
 
     :param tskit.Tree tree: The tree to compute the Sackin index of.
     :return : The Sackin index of the tree.
@@ -66,10 +67,12 @@ def colless_index(tree):
     Returns the Colless imbalance index for this tree.
 
     .. warning::
-        Colless index is only defined for binary trees and is not defined for multiroot trees.
+        Colless index is only defined for binary trees and is not defined for multiroot
+        trees.
 
     .. seealso::
-        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
+        details.
 
     :param tskit.Tree tree: The tree to compute the Colless index of.
     :return : The Colless index of the tree.
@@ -99,7 +102,8 @@ def b1_index(tree):
     Returns the B1 balance index for this tree.
 
     .. seealso::
-        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
+        details.
 
     :param tskit.Tree tree: The tree to compute the B1 index of.
     :return : The B1 index of the tree.
@@ -151,10 +155,12 @@ def b2_index(tree, base=10):
     Returns the B2 balance index for this tree.
 
     .. seealso::
-        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more details.
+        See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
+        details.
 
     :param tskit.Tree tree: The tree to compute the B2 index of.
-    :param int base: The base of the logarithm used to compute the B2 index in the Shannon entropy computation.
+    :param int base: The base of the logarithm used to compute the B2 index in the
+    Shannon entropy computation.
     :return : The B2 index of the tree.
     :rtype : float
     """

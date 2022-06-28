@@ -1,6 +1,5 @@
 # Tests for the tree balance/imbalance metrics
 import pytest
-
 import tskit
 
 import phylokit as pk
