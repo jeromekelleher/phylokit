@@ -52,5 +52,14 @@ jobs:
           pip install -r requirements/CI.txt
 
       - name: Run tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m pytest -x -n2
+          coverage run --source=phylokit -m pytest -x -n0
+
+      - name: Upload coverage
+        if: ${{ matrix.python == '3.10' && matrix.os == 'ubuntu-latest' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
