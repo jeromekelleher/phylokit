@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, test]
+
+jobs:
+  pre-commit:
+    name: Lint
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - uses: pre-commit/action@v3.0.0
+
+  test:
+    name: Python
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [ 3.7, 3.9, "3.10" ]
+        os:  [ macos-latest, ubuntu-latest, windows-latest ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python and cache deps
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+          cache: 'pip'
+          cache-dependency-path: requirements/CI.txt
+
+      - name: Install pip deps
+        run: |
+          pip install -r requirements/CI.txt
+
+      - name: Run tests
+        run: |
+          python -m pytest -x -n2
