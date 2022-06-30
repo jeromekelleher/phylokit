@@ -1,11 +1,12 @@
 # Tree balance/imbalance metrics.
 import math
 
-import numba
 import numpy as np
 
+from . import core
 
-@numba.njit(cache=True)
+
+@core.numba_njit
 def _sackin_index(virtual_root, left_child, right_sib):
     stack = []
     root = left_child[virtual_root]
@@ -41,7 +42,7 @@ def sackin_index(tree):
     return _sackin_index(tree.virtual_root, tree.left_child_array, tree.right_sib_array)
 
 
-@numba.njit(cache=True)
+@core.numba_njit
 def _colless_index(postorder, left_child, right_sib):
     num_leaves = np.zeros_like(left_child)
     total = 0.0
@@ -83,7 +84,7 @@ def colless_index(tree):
     return _colless_index(tree.postorder(), tree.left_child_array, tree.right_sib_array)
 
 
-@numba.njit(cache=True)
+@core.numba_njit
 def _b1_index(postorder, left_child, right_sib, parent):
     max_path_length = np.zeros_like(postorder)
     total = 0.0
@@ -114,7 +115,7 @@ def b1_index(tree):
     )
 
 
-@numba.njit(cache=True)
+@core.numba_njit
 def general_log(x, base):
     """
     Compute the logarithm of x in base `base`.
@@ -127,7 +128,7 @@ def general_log(x, base):
     return math.log(x) / math.log(base)
 
 
-@numba.njit(cache=True)
+@core.numba_njit
 def _b2_index(virtual_root, left_child, right_sib, base):
     root = left_child[virtual_root]
     stack = [(root, 1)]
