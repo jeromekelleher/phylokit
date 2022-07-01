@@ -3,3 +3,6 @@ pre-commit
 pytest
 pytest-xdist
 tskit
+msprime
+sgkit
+scipy
