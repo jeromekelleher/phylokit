@@ -1,7 +1,7 @@
-import sgkit
 import numpy as np
-import scipy.spatial.distance as dist
 import scipy.cluster.hierarchy as hier
+import scipy.spatial.distance as dist
+import sgkit
 
 from . import core
 

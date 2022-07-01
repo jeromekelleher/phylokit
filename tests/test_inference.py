@@ -1,6 +1,6 @@
+import msprime
 import numpy as np
 import sgkit
-import msprime
 
 import phylokit as pk
 from phylokit import inference

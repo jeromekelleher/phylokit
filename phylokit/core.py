@@ -1,7 +1,7 @@
 import numba
-import xarray
-import tskit
 import numpy as np
+import tskit
+import xarray
 
 DIM_NODE = "nodes"
 # Following sgkit example, specifically so that we can join on the samples dimension
@@ -52,6 +52,6 @@ def dataset_to_tskit(ds):
     # TODO do this more efficiently.
     for u, parent in enumerate(ds.node_parent):
         if parent != -1:
-            tables.edges.add_row(0, 1, parent, u)
+            tables.edges.add_row(0, 1, int(parent), u)
     tables.sort()
     return tables.tree_sequence().first()

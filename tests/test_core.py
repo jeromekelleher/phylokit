@@ -1,8 +1,7 @@
+import msprime
+import numpy.testing
 import pytest
 import tskit
-import numpy.testing
-import msprime
-
 
 import phylokit as pk
 
