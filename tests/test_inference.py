@@ -55,7 +55,7 @@ def test_things():
     ds = ts_to_dataset(ts_in)
     ds_tree = inference.upgma(ds)
     ds_merged = ds_tree.merge(ds)
-    ts_out = pk.dataset_to_tskit(ds_merged)
+    ts_out = pk.to_tskit(ds_merged)
     # print(ds_merged)
     # print(ts_in.draw_text())
     # print(ds_merged)

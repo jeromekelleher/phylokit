@@ -31,7 +31,11 @@ def linkage_matrix_to_dataset(Z):
     left_child[-1] = N - 2
     time[-1] = np.inf
     return core.create_tree_dataset(
-        parent, time, left_child, right_sib, np.arange(n, dtype=np.int32)
+        parent=parent,
+        time=time,
+        left_child=left_child,
+        right_sib=right_sib,
+        samples=np.arange(n, dtype=np.int32),
     )
 
 

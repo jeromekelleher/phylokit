@@ -42,12 +42,29 @@ def numba_njit(func, **kwargs):
 
 
 # TODO add some defaults
-def create_tree_dataset(*, parent, time, left_child, right_sib, samples):
+def create_tree_dataset(
+    *,
+    parent,
+    left_child,
+    right_sib,
+    samples,
+    time=None,
+    branch_length=None,
+    sample_id=None
+):
     data_vars = {
         "node_parent": ([DIM_NODE], parent),
-        "node_time": ([DIM_NODE], time),
         "node_left_child": ([DIM_NODE], left_child),
         "node_right_sib": ([DIM_NODE], right_sib),
         "sample_node": ([DIM_SAMPLE], samples),
     }
+    if time is not None:
+        data_vars["node_time"] = ([DIM_NODE], time)
+    if branch_length is not None:
+        data_vars["node_branch_length"] = ([DIM_NODE], branch_length)
+    # TODO should sample_id be a dimension instead so that we support
+    # direct indexing on it?
+    if sample_id is not None:
+        data_vars["sample_id"] = ([DIM_SAMPLE], sample_id)
+
     return xarray.Dataset(data_vars)
