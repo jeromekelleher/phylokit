@@ -111,7 +111,10 @@ def b1_index(tree):
     :rtype : float
     """
     return _b1_index(
-        tree.postorder(), tree.left_child_array, tree.right_sib_array, tree.parent_array
+        tree.postorder(),
+        tree.left_child_array,
+        tree.right_sib_array,
+        tree.parent_array,
     )
 
 
