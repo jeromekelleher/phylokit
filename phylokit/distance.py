@@ -40,7 +40,7 @@ def mrca(ds, u, v):
     :return: The most recent common ancestor of input nodes.
     :rtype: int
     """
-    virtual_root = -1
+    virtual_root = len(ds.node_parent.data) - 1
     # Check if u or v is outside the tree
     util.check_node_bounds(ds, u, v)
     # Check if u and v are virtual roots
@@ -122,3 +122,94 @@ def kc_distance(ds1, ds2, lambda_=0.0):
     )
 
     return np.linalg.norm((1 - lambda_) * (m[0] - m[1]) + lambda_ * (M[0] - M[1]))
+
+
+@core.numba_njit
+def _get_bipartition(postorder, left_child, right_sib):
+    num_nodes = postorder.shape[0]
+    num_leaves = 0
+    bitmask = np.zeros((num_nodes, num_nodes), dtype=np.uint8)
+    for u in postorder:
+        v = left_child[u]
+        num_children = 0
+        while v != -1:
+            num_children += 1
+            v = right_sib[v]
+        if num_children == 0:
+            num_leaves += 1
+            bitmask[u][-u - 1] = 1
+        else:
+            v = left_child[u]
+            while v != -1:
+                bitmask[u] = np.bitwise_or(bitmask[u], bitmask[v])
+                v = right_sib[v]
+    return bitmask[:, num_leaves - 1 :]
+
+
+def get_bipartition(ds):
+    """
+    Returns the bipartition of the tree.
+
+    :param xarray.DataArray ds: The tree to encode.
+    :return : The bipartition of the tree.
+    :rtype : numpy.ndarray
+    """
+    return _get_bipartition(
+        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+    )
+
+
+def pad_bipartitions(tree1_biparts, tree2_biparts):
+    """
+    Reshape the bipartitions of two trees to the same shape.
+
+    :param numpy.ndarray tree1_biparts: The bipartition of the first tree.
+    :param numpy.ndarray tree2_biparts: The bipartition of the second tree.
+    :return : bipartitions with the same shape.
+    :rtype : int
+    """
+    t1_shape = tree1_biparts.shape
+    t2_shape = tree2_biparts.shape
+    if t1_shape[1] != t2_shape[1]:
+        if t1_shape[1] > t2_shape[1]:
+            tree2_biparts = np.pad(
+                tree2_biparts,
+                ((0, 0), (t1_shape[1] - t2_shape[1], 0)),
+                "constant",
+            )
+        else:
+            tree1_biparts = np.pad(
+                tree1_biparts,
+                ((0, 0), (t2_shape[1] - t1_shape[1], 0)),
+                "constant",
+            )
+    return tree1_biparts, tree2_biparts
+
+
+def _rf_distance(b1, b2):
+    # Using similar method in DendroPy
+    s1 = {tuple(x) for x in b1}
+    s2 = {tuple(x) for x in b2}
+    false_positives = s1.difference(s2)
+    false_negatives = s2.difference(s1)
+    return len(false_positives) + len(false_negatives)
+
+
+def rf_distance(ds1, ds2):
+    """
+    Returns the Robinson-Foulds distance between the specified pair of trees.
+
+    .. seealso::
+        See `Robinson & Foulds (1981)
+        <https://doi.org/10.1016/0025-5564(81)90043-2>`_ for more details.
+
+    :param xarray.DataArray ds1: The first tree to compare.
+    :param xarray.DataArray ds2: The second tree to compare.
+    :return : The Robinson-Foulds distance between the trees.
+    :rtype : int
+    """
+    if util.get_num_roots(ds1) != 1 or util.get_num_roots(ds2) != 1:
+        raise ValueError("Trees must have a single root")
+    b1, b2 = pad_bipartitions(get_bipartition(ds1), get_bipartition(ds2))
+
+    return _rf_distance(b1, b2)
