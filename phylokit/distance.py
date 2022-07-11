@@ -1,45 +1,11 @@
 # Tree distance metrics.
-import numba
 import numpy as np
 
-
-def check_node_bounds(tree, *args):
-    """
-    Checks that the specified node is within the tree.
-
-    :param tskit.Tree tree: The tree to check.
-    :param int `*args`: The node IDs to check.
-    :raises ValueError: If any of the nodes are outside the tree.
-    """
-    num_nodes = tree.parent_array.shape[0] - 1
-    for u in args:
-        if u < 0 or u > num_nodes:
-            raise ValueError(f"Node {u} is not in the tree")
+from . import core
+from . import util
 
 
-@numba.njit(cache=True)
-def _branch_length(parent, time, u):
-    ret = 0
-    p = parent[u]
-    if p != -1:
-        ret = time[p] - time[u]
-    return ret
-
-
-def branch_length(tree, u):
-    """
-    Returns the length of the branch (in units of time) joining the specified
-    node to its parent.
-
-    :param int u: The node ID.
-    :return : The length of the branch.
-    :rtype : float
-    """
-    check_node_bounds(tree, u)
-    return _branch_length(tree.parent_array, tree.tree_sequence.tables.nodes.time, u)
-
-
-@numba.njit(cache=True)
+@core.numba_njit
 def _mrca(parent, time, u, v):
     tu = time[u]
     tv = time[v]
@@ -57,34 +23,46 @@ def _mrca(parent, time, u, v):
     return u
 
 
-def mrca(tree, u, v):
+def _sv_mrca(ds, u, v):
+    # TODO - Schieber, B. and U. Vishkin (1988).
+    # "On Finding Lowest Common Ancestors: Simplification and Parallelization."
+    # SIAM Journal on Computing 17(6): 1253-1262.
+    pass
+
+
+def mrca(ds, u, v):
     """
     Returns the most recent common ancestor of the specified nodes.
 
-    :param int `*args`: input node IDs, must be at least 2.
+    :param xarray.DataArray ds: The tree to compare.
+    :param int u: The first node ID.
+    :param int v: The second node ID.
     :return: The most recent common ancestor of input nodes.
     :rtype: int
     """
-    virtual_root = tree.virtual_root
+    virtual_root = -1
     # Check if u or v is outside the tree
-    check_node_bounds(tree, u, v)
+    util.check_node_bounds(ds, u, v)
     # Check if u and v are virtual roots
     if u == virtual_root or v == virtual_root:
         return virtual_root
-    return _mrca(tree.parent_array, tree.tree_sequence.tables.nodes.time, u, v)
+    if "sv_tau" in ds:
+        return _sv_mrca(ds, u, v)
+    else:
+        return _mrca(ds.node_parent.data, ds.node_time.data, u, v)
 
 
-@numba.njit(cache=True)
-def _kc_distance(samples, t1, t2):
-    # t1 and t2 are tuples of the form (parent_array, time_array, root)
+@core.numba_njit
+def _kc_distance(samples, ds1, ds2):
+    # ds1 and ds2 are tuples of the form (parent_array, time_array, branch_length, root)
     n = samples.shape[0]
     N = (n * (n - 1)) // 2
     m = [np.zeros(N + n), np.zeros(N + n)]
     M = [np.zeros(N + n), np.zeros(N + n)]
-    for tree_index, tree in enumerate([t1, t2]):
+    for tree_index, tree in enumerate([ds1, ds2]):
         for sample in range(n):
             m[tree_index][N + sample] = 1
-            M[tree_index][N + sample] = _branch_length(tree[0], tree[1], sample)
+            M[tree_index][N + sample] = tree[2][sample]
 
         for n1 in range(n):
             for n2 in range(n1 + 1, n):
@@ -96,11 +74,11 @@ def _kc_distance(samples, t1, t2):
                     p = tree[0][p]
                 pair_index = n1 * (n1 - 2 * n + 1) // -2 + n2 - n1 - 1
                 m[tree_index][pair_index] = depth
-                M[tree_index][pair_index] = tree[1][tree[2]] - tree[1][mrca_id]
+                M[tree_index][pair_index] = tree[1][tree[3]] - tree[1][mrca_id]
     return m, M
 
 
-def kc_distance(tree1, tree2, lambda_=0.0):
+def kc_distance(ds1, ds2, lambda_=0.0):
     """
     Returns the Kendall-Colijn distance between the specified pair of trees.
     lambda_ determines weight of topology vs branch lengths in calculating
@@ -112,33 +90,34 @@ def kc_distance(tree1, tree2, lambda_=0.0):
         <https://academic.oup.com/mbe/article/33/10/2735/2925548>`_
         for more details.
 
-    :param tskit.Tree tree1: The first tree to compare.
-    :param tskit.Tree tree2: The second tree to compare.
+    :param xarray.DataArray ds1: The first tree to compare.
+    :param xarray.DataArray ds2: The second tree to compare.
     :param float lambda_: The weight of topology in the distance calculation.
     :return : The Kendall-Colijn distance between the trees.
     :rtype : float
     """
-    samples = tree1.tree_sequence.samples()
-    if not np.array_equal(samples, tree2.tree_sequence.samples()):
+    samples = ds1.sample_node.data
+    if not np.array_equal(samples, ds2.sample_node.data):
         raise ValueError("Trees must have the same samples")
-    if tree1.num_roots != 1 or tree2.num_roots != 1:
+    if util.get_num_roots(ds1) != 1 or util.get_num_roots(ds2) != 1:
         raise ValueError("Trees must have a single root")
-    for tree in [tree1, tree2]:
-        for u in tree.nodes():
-            if tree.num_children(u) == 1:
-                raise ValueError("Unary nodes are not supported")
+    for tree in [ds1, ds2]:
+        if util.is_unary(tree):
+            raise ValueError("Unary nodes are not supported")
 
     m, M = _kc_distance(
         samples,
         (
-            tree1.parent_array,
-            tree1.tree_sequence.tables.nodes.time,
-            tree1.root,
+            ds1.node_parent.data,
+            ds1.node_time.data[:-1],
+            ds1.node_branch_length.data,
+            ds1.node_left_child.data[-1],
         ),
         (
-            tree2.parent_array,
-            tree2.tree_sequence.tables.nodes.time,
-            tree2.root,
+            ds2.node_parent.data,
+            ds2.node_time.data[:-1],
+            ds2.node_branch_length.data,
+            ds2.node_left_child.data[-1],
         ),
     )
 
