@@ -6,9 +6,17 @@ from .convert import from_newick  # NOQA
 from .convert import from_tskit  # NOQA
 from .convert import to_newick  # NOQA
 from .convert import to_tskit  # NOQA
-from .distance import branch_length
 from .distance import kc_distance
 from .distance import mrca
+from .traversal import _postorder
+from .traversal import _preorder
+from .traversal import postorder
+from .traversal import preorder
+from .util import _get_node_branch_length
+from .util import check_node_bounds
+from .util import get_node_branch_length
+from .util import get_num_roots
+from .util import is_unary
 
 __all__ = [
     "sackin_index",
@@ -22,4 +30,13 @@ __all__ = [
     "mrca",
     "branch_length",
     "kc_distance",
+    "postorder",
+    "preorder",
+    "_preorder",
+    "_postorder",
+    "is_unary",
+    "get_num_roots",
+    "get_node_branch_length",
+    "_get_node_branch_length",
+    "check_node_bounds",
 ]

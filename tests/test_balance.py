@@ -12,8 +12,12 @@ class TestBalancedBinaryOdd:
     #     ┊ ┃ ┏┻┓ ┊
     # 0.00┊ 0 1 2 ┊
     #     0      1
-    def tree(self):
+
+    def tsk_tree(self):
         return tskit.Tree.generate_balanced(3)
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 5
@@ -35,8 +39,12 @@ class TestBalancedBinaryEven:
     #     ┊ ┏┻┓ ┏┻┓ ┊
     # 0.00┊ 0 1 2 3 ┊
     #     0         1
-    def tree(self):
+
+    def tsk_tree(self):
         return tskit.Tree.generate_balanced(4)
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 8
@@ -83,8 +91,11 @@ class TestBalancedTernary:
     #     ┊ ┏━╋━┓ ┏━╋━┓ ┏━╋━┓ ┊
     # 0.00┊ 0 1 2 3 4 5 6 7 8 ┊
     #     0                   1
-    def tree(self):
+    def tsk_tree(self):
         return tskit.Tree.generate_balanced(9, arity=3)
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 18
@@ -105,8 +116,11 @@ class TestStarN10:
     #     ┊ ┏━┳━┳━┳━┳┻┳━┳━┳━┳━┓ ┊
     # 0.00┊ 0 1 2 3 4 5 6 7 8 9 ┊
     #     0                     1
-    def tree(self):
+    def tsk_tree(self):
         return tskit.Tree.generate_star(10)
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 10
@@ -133,8 +147,11 @@ class TestCombN5:
     #     ┊ ┃ ┃ ┃ ┏┻┓ ┊
     # 0.00┊ 0 1 2 3 4 ┊
     #     0           1
-    def tree(self):
+    def tsk_tree(self):
         return tskit.Tree.generate_comb(5)
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 14
@@ -158,7 +175,7 @@ class TestMultiRootBinary:
     #     ┊ ┏┻┓ ┏┻┓ ┏┻┓ ┃ ┏┻┓ ┊
     # 0.00┊ 0 1 2 3 4 5 6 7 8 ┊
     #     0                   1
-    def tree(self):
+    def tsk_tree(self):
         tables = tskit.Tree.generate_balanced(9, arity=2).tree_sequence.dump_tables()
         edges = tables.edges.copy()
         tables.edges.clear()
@@ -166,6 +183,9 @@ class TestMultiRootBinary:
             if edge.parent != 16:
                 tables.edges.append(edge)
         return tables.tree_sequence().first()
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 20
@@ -183,9 +203,12 @@ class TestMultiRootBinary:
 
 
 class TestEmpty:
-    def tree(self):
+    def tsk_tree(self):
         tables = tskit.TableCollection(1)
         return tables.tree_sequence().first()
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0
@@ -203,10 +226,13 @@ class TestEmpty:
 
 
 class TestTreeInNullState:
-    def tree(self):
+    def tsk_tree(self):
         tree = tskit.Tree.generate_comb(5)
         tree.clear()
         return tree
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0
@@ -224,11 +250,14 @@ class TestTreeInNullState:
 
 
 class TestAllRootsN5:
-    def tree(self):
+    def tsk_tree(self):
         tables = tskit.TableCollection(1)
         for _ in range(5):
             tables.nodes.add_row(flags=tskit.NODE_IS_SAMPLE, time=0)
         return tables.tree_sequence().first()
+
+    def tree(self):
+        return pk.from_tskit(self.tsk_tree())
 
     def test_sackin(self):
         assert pk.sackin_index(self.tree()) == 0

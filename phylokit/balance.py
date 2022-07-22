@@ -4,6 +4,7 @@ import math
 import numpy as np
 
 from . import core
+from . import util
 
 
 @core.numba_njit
@@ -27,7 +28,7 @@ def _sackin_index(virtual_root, left_child, right_sib):
     return total_depth
 
 
-def sackin_index(tree):
+def sackin_index(ds):
     """
     Returns the Sackin imbalance index for this tree.
 
@@ -35,11 +36,11 @@ def sackin_index(tree):
         See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
         details.
 
-    :param tskit.Tree tree: The tree to compute the Sackin index of.
+    :param xarray.DataSet ds: The tree dataset to compute the Sackin index of.
     :return : The Sackin index of the tree.
     :rtype : float
     """
-    return _sackin_index(tree.virtual_root, tree.left_child_array, tree.right_sib_array)
+    return _sackin_index(-1, ds.node_left_child.data, ds.node_right_sib.data)
 
 
 @core.numba_njit
@@ -63,7 +64,7 @@ def _colless_index(postorder, left_child, right_sib):
     return total
 
 
-def colless_index(tree):
+def colless_index(ds):
     """
     Returns the Colless imbalance index for this tree.
 
@@ -75,13 +76,15 @@ def colless_index(tree):
         See `Shao and Sokal (1990) <https://www.jstor.org/stable/2992186>`_ for more
         details.
 
-    :param tskit.Tree tree: The tree to compute the Colless index of.
+    :param xarray.DataSet ds: The tree dataset to compute the Colless index of.
     :return : The Colless index of the tree.
     :rtype : float
     """
-    if tree.num_roots != 1:
+    if util.get_num_roots(ds) != 1:
         raise ValueError("Colless index not defined for multiroot trees")
-    return _colless_index(tree.postorder(), tree.left_child_array, tree.right_sib_array)
+    return _colless_index(
+        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+    )
 
 
 @core.numba_njit
@@ -98,7 +101,7 @@ def _b1_index(postorder, left_child, right_sib, parent):
     return total
 
 
-def b1_index(tree):
+def b1_index(ds):
     """
     Returns the B1 balance index for this tree.
 
@@ -111,10 +114,10 @@ def b1_index(tree):
     :rtype : float
     """
     return _b1_index(
-        tree.postorder(),
-        tree.left_child_array,
-        tree.right_sib_array,
-        tree.parent_array,
+        ds.traversal_postorder.data,
+        ds.node_left_child.data,
+        ds.node_right_sib.data,
+        ds.node_parent.data,
     )
 
 
@@ -154,7 +157,7 @@ def _b2_index(virtual_root, left_child, right_sib, base):
     return total_proba
 
 
-def b2_index(tree, base=10):
+def b2_index(ds, base=10):
     """
     Returns the B2 balance index for this tree.
 
@@ -168,9 +171,12 @@ def b2_index(tree, base=10):
     :return : The B2 index of the tree.
     :rtype : float
     """
-    if tree.num_roots != 1:
+    if util.get_num_roots(ds) != 1:
         raise ValueError("B2 index not defined for multiroot trees")
     math.log(10, base)  # Check that base is valid
     return _b2_index(
-        tree.virtual_root, tree.left_child_array, tree.right_sib_array, base
+        -1,
+        ds.node_left_child.data,
+        ds.node_right_sib.data,
+        base,
     )

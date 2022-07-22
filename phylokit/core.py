@@ -4,9 +4,12 @@ import os
 import numba
 import xarray
 
+import phylokit as pk
+
 logger = logging.getLogger(__name__)
 
 DIM_NODE = "nodes"
+DIM_TRAVERSAL = "traversal"
 # Following sgkit example, specifically so that we can join on the samples dimension
 DIM_SAMPLE = "samples"
 
@@ -24,7 +27,8 @@ except KeyError as e:  # pragma: no cover
 
 if not ENABLE_NUMBA:
     logger.warning(
-        "numba globally disabled for phylokit; performance will be drastically reduced."
+        "numba globally disabled for phylokit; performance will be drastically"
+        " reduced."
     )
 
 
@@ -50,7 +54,9 @@ def create_tree_dataset(
     samples,
     time=None,
     branch_length=None,
-    sample_id=None
+    sample_id=None,
+    preorder=None,
+    postorder=None,
 ):
     data_vars = {
         "node_parent": ([DIM_NODE], parent),
@@ -58,10 +64,29 @@ def create_tree_dataset(
         "node_right_sib": ([DIM_NODE], right_sib),
         "sample_node": ([DIM_SAMPLE], samples),
     }
+    if preorder is not None:
+        data_vars["traversal_preorder"] = ([DIM_TRAVERSAL], preorder)
+    else:
+        data_vars["traversal_preorder"] = (
+            [DIM_TRAVERSAL],
+            pk._preorder(parent, left_child, right_sib, -1),
+        )
+    if postorder is not None:
+        data_vars["traversal_postorder"] = ([DIM_TRAVERSAL], postorder)
+    else:
+        data_vars["traversal_postorder"] = (
+            [DIM_TRAVERSAL],
+            pk._postorder(left_child, right_sib, -1),
+        )
     if time is not None:
         data_vars["node_time"] = ([DIM_NODE], time)
     if branch_length is not None:
         data_vars["node_branch_length"] = ([DIM_NODE], branch_length)
+    else:
+        data_vars["node_branch_length"] = (
+            [DIM_NODE],
+            pk._get_node_branch_length(parent, time),
+        )
     # TODO should sample_id be a dimension instead so that we support
     # direct indexing on it?
     if sample_id is not None:
