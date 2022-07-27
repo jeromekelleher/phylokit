@@ -1,48 +1,13 @@
-import logging
-import os
-
-import numba
 import xarray
 
-import phylokit as pk
-
-logger = logging.getLogger(__name__)
+from .traversal import _postorder
+from .traversal import _preorder
+from .util import _get_node_branch_length
 
 DIM_NODE = "nodes"
 DIM_TRAVERSAL = "traversal"
 # Following sgkit example, specifically so that we can join on the samples dimension
 DIM_SAMPLE = "samples"
-
-_DISABLE_NUMBA = os.environ.get("PHYLOKIT_DISABLE_NUMBA", "0")
-
-try:
-    ENABLE_NUMBA = {"0": True, "1": False}[_DISABLE_NUMBA]
-except KeyError as e:  # pragma: no cover
-    raise KeyError(
-        "Environment variable 'PHYLOKIT_DISABLE_NUMBA' must be '0' or '1'"
-    ) from e
-
-# We will mostly be using disable numba for debugging and running tests for
-# coverage, so raise a loud warning in case this is being used accidentally.
-
-if not ENABLE_NUMBA:
-    logger.warning(
-        "numba globally disabled for phylokit; performance will be drastically"
-        " reduced."
-    )
-
-
-DEFAULT_NUMBA_ARGS = {
-    "nopython": True,
-    "cache": True,
-}
-
-
-def numba_njit(func, **kwargs):
-    if ENABLE_NUMBA:  # pragma: no cover
-        return numba.jit(func, **{**DEFAULT_NUMBA_ARGS, **kwargs})
-    else:
-        return func
 
 
 # TODO add some defaults
@@ -69,14 +34,14 @@ def create_tree_dataset(
     else:
         data_vars["traversal_preorder"] = (
             [DIM_TRAVERSAL],
-            pk._preorder(parent, left_child, right_sib, -1),
+            _preorder(parent, left_child, right_sib, -1),
         )
     if postorder is not None:
         data_vars["traversal_postorder"] = ([DIM_TRAVERSAL], postorder)
     else:
         data_vars["traversal_postorder"] = (
             [DIM_TRAVERSAL],
-            pk._postorder(left_child, right_sib, -1),
+            _postorder(left_child, right_sib, -1),
         )
     if time is not None:
         data_vars["node_time"] = ([DIM_NODE], time)
@@ -85,7 +50,7 @@ def create_tree_dataset(
     else:
         data_vars["node_branch_length"] = (
             [DIM_NODE],
-            pk._get_node_branch_length(parent, time),
+            _get_node_branch_length(parent, time),
         )
     # TODO should sample_id be a dimension instead so that we support
     # direct indexing on it?

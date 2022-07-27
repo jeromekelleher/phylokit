@@ -1,9 +1,9 @@
 import numpy as np
 
-from . import core
+from . import jit
 
 
-@core.numba_njit
+@jit.numba_njit
 def _is_unary(postorder, left_child, right_sib):
     for u in postorder:
         v = left_child[u]
@@ -42,7 +42,7 @@ def check_node_bounds(ds, *args):
             raise ValueError(f"Node {u} is not in the tree")
 
 
-@core.numba_njit
+@jit.numba_njit
 def _get_num_roots(left_child, right_sib):
     u = left_child[-1]
     num_roots = 0
@@ -63,7 +63,7 @@ def get_num_roots(ds):
     return _get_num_roots(ds.node_left_child.data, ds.node_right_sib.data)
 
 
-@core.numba_njit
+@jit.numba_njit
 def _branch_length(parent, time, u):
     ret = 0
     p = parent[u]
@@ -86,7 +86,7 @@ def branch_length(ds, u):
     return _branch_length(ds.node_parent.data, ds.node_time.data, u)
 
 
-@core.numba_njit
+@jit.numba_njit
 def _get_node_branch_length(parent, time):
     ret = np.zeros_like(parent)
     for i in range(parent.shape[0]):
