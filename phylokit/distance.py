@@ -1,11 +1,11 @@
 # Tree distance metrics.
 import numpy as np
 
-from . import core
+from . import jit
 from . import util
 
 
-@core.numba_njit
+@jit.numba_njit
 def _mrca(parent, time, u, v):
     tu = time[u]
     tv = time[v]
@@ -52,7 +52,7 @@ def mrca(ds, u, v):
         return _mrca(ds.node_parent.data, ds.node_time.data, u, v)
 
 
-@core.numba_njit
+@jit.numba_njit
 def _kc_distance(samples, ds1, ds2):
     # ds1 and ds2 are tuples of the form (parent_array, time_array, branch_length, root)
     n = samples.shape[0]
