@@ -124,7 +124,17 @@ def kc_distance(ds1, ds2, lambda_=0.0):
     return np.linalg.norm((1 - lambda_) * (m[0] - m[1]) + lambda_ * (M[0] - M[1]))
 
 
-def _get_node_partition(postorder, left_child, right_sib):
+def get_node_partition(postorder, left_child, right_sib):
+    """
+    This is a naive implementation of encoding a node's partition
+    using python's set operations to calculate the unweighted robinson
+    foulds distance (symmetric distance)
+    NOTE: This pure python implementation is faster than the jitted implementation,
+    the speed of traversing the tree is faster in jitted version, but it took to
+    much time calculating bitwise_or, therefore we use the naive implementation for
+    now.
+    NOTE: A potential optimization is using bit shifting rather than bitwise_or
+    """
     tree_sets = [set()] * (len(left_child) - 1)
     for u in postorder:
         v = left_child[u]
@@ -136,27 +146,6 @@ def _get_node_partition(postorder, left_child, right_sib):
                 v = right_sib[v]
 
     return tree_sets
-
-
-def get_node_partition(ds):
-    """
-    Returns a list of sets of nodes that are in the same partition.
-
-    :param xarray.DataArray ds: The tree to encode.
-    :return : The node partition.
-    :rtype : list
-    """
-    return _get_node_partition(
-        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
-    )
-
-
-def _rf_distance(b1, b2):
-    # Using similar method in DendroPy
-    s1 = {frozenset(x) for x in b1}
-    s2 = {frozenset(x) for x in b2}
-
-    return len(s1.symmetric_difference(s2))
 
 
 def rf_distance(ds1, ds2):
@@ -175,6 +164,18 @@ def rf_distance(ds1, ds2):
     if util.get_num_roots(ds1) != 1 or util.get_num_roots(ds2) != 1:
         raise ValueError("Trees must have a single root")
 
-    b1, b2 = get_node_partition(ds1), get_node_partition(ds2)
+    b1 = get_node_partition(
+        ds1.traversal_postorder.data,
+        ds1.node_left_child.data,
+        ds1.node_right_sib.data,
+    )
+    b2 = get_node_partition(
+        ds2.traversal_postorder.data,
+        ds2.node_left_child.data,
+        ds2.node_right_sib.data,
+    )
 
-    return _rf_distance(b1, b2)
+    s1 = {frozenset(x) for x in b1}
+    s2 = {frozenset(x) for x in b2}
+
+    return len(s1.symmetric_difference(s2))
