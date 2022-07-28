@@ -40,7 +40,7 @@ def mrca(ds, u, v):
     :return: The most recent common ancestor of input nodes.
     :rtype: int
     """
-    virtual_root = -1
+    virtual_root = len(ds.node_parent.data) - 1
     # Check if u or v is outside the tree
     util.check_node_bounds(ds, u, v)
     # Check if u and v are virtual roots
@@ -122,3 +122,59 @@ def kc_distance(ds1, ds2, lambda_=0.0):
     )
 
     return np.linalg.norm((1 - lambda_) * (m[0] - m[1]) + lambda_ * (M[0] - M[1]))
+
+
+def _get_node_partition(postorder, left_child, right_sib):
+    tree_sets = [set()] * (len(left_child) - 1)
+    for u in postorder:
+        v = left_child[u]
+        if v == -1:
+            tree_sets[u] = {u}
+        else:
+            while v != -1:
+                tree_sets[u] = tree_sets[u] | tree_sets[v]
+                v = right_sib[v]
+
+    return tree_sets
+
+
+def get_node_partition(ds):
+    """
+    Returns a list of sets of nodes that are in the same partition.
+
+    :param xarray.DataArray ds: The tree to encode.
+    :return : The node partition.
+    :rtype : list
+    """
+    return _get_node_partition(
+        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+    )
+
+
+def _rf_distance(b1, b2):
+    # Using similar method in DendroPy
+    s1 = {frozenset(x) for x in b1}
+    s2 = {frozenset(x) for x in b2}
+
+    return len(s1.symmetric_difference(s2))
+
+
+def rf_distance(ds1, ds2):
+    """
+    Returns the Robinson-Foulds distance between the specified pair of trees.
+
+    .. seealso::
+        See `Robinson & Foulds (1981)
+        <https://doi.org/10.1016/0025-5564(81)90043-2>`_ for more details.
+
+    :param xarray.DataArray ds1: The first tree to compare.
+    :param xarray.DataArray ds2: The second tree to compare.
+    :return : The Robinson-Foulds distance between the trees.
+    :rtype : int
+    """
+    if util.get_num_roots(ds1) != 1 or util.get_num_roots(ds2) != 1:
+        raise ValueError("Trees must have a single root")
+
+    b1, b2 = get_node_partition(ds1), get_node_partition(ds2)
+
+    return _rf_distance(b1, b2)
