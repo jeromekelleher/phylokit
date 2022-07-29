@@ -4,21 +4,17 @@ import scipy.spatial.distance as dist
 import sgkit
 
 from . import core
+from . import jit
 
 
-def linkage_matrix_to_dataset(Z):
-    """
-    Scipy's hierarchy methods return a (n-1, 4) linkage matrix describing the clustering
-    of the n observations. Each row in this matrix corresponds to an internal node
-    in the tree.
-    """
+@jit.numba_njit
+def _linkage_matrix_to_dataset(Z):
     n = Z.shape[0] + 1
     N = 2 * n
     parent = np.full(N, -1, dtype=np.int32)
     time = np.full(N, 0, dtype=np.float64)
     left_child = np.full(N, -1, dtype=np.int32)
     right_sib = np.full(N, -1, dtype=np.int32)
-    # TODO Make a jitted function to do this
     for j, row in enumerate(Z):
         u = n + j
         time[u] = j + 1
@@ -30,6 +26,16 @@ def linkage_matrix_to_dataset(Z):
         right_sib[lc] = rc
     left_child[-1] = N - 2
     time[-1] = np.inf
+    return parent, time, left_child, right_sib, n
+
+
+def linkage_matrix_to_dataset(Z):
+    """
+    Scipy's hierarchy methods return a (n-1, 4) linkage matrix describing the clustering
+    of the n observations. Each row in this matrix corresponds to an internal node
+    in the tree.
+    """
+    parent, time, left_child, right_sib, n = _linkage_matrix_to_dataset(Z)
     return core.create_tree_dataset(
         parent=parent,
         time=time,
