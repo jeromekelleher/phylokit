@@ -48,10 +48,11 @@ def create_tree_dataset(
     if branch_length is not None:
         data_vars["node_branch_length"] = ([DIM_NODE], branch_length)
     else:
-        data_vars["node_branch_length"] = (
-            [DIM_NODE],
-            _get_node_branch_length(parent, time),
-        )
+        if time is not None:
+            data_vars["node_branch_length"] = (
+                [DIM_NODE],
+                _get_node_branch_length(parent, time),
+            )
     # TODO should sample_id be a dimension instead so that we support
     # direct indexing on it?
     if sample_id is not None:

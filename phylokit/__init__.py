@@ -9,6 +9,7 @@ from .convert import to_tskit  # NOQA
 from .distance import kc_distance
 from .distance import mrca
 from .distance import rf_distance
+from .transform import permute_tree
 from .traversal import _postorder
 from .traversal import _preorder
 from .traversal import postorder
@@ -41,4 +42,5 @@ __all__ = [
     "get_node_branch_length",
     "_get_node_branch_length",
     "check_node_bounds",
+    "permute_tree",
 ]
