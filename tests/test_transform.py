@@ -28,16 +28,28 @@ class TestPermuteTree:
         #     0         1
         tsk_tree = tskit.Tree.generate_comb(4)
         pk_tree = pk.from_tskit(tsk_tree)
+
         ordering = np.append(
             pk_tree.traversal_preorder.data, len(pk_tree.node_parent.data) - 1
         )
+        permuted_tree = pk.permute_tree(
+            pk_tree,
+            ordering=ordering,
+        )
+
         assert (
-            pk.permute_tree(
-                pk_tree,
-                ordering=ordering,
-            ).node_parent.data.all()
+            permuted_tree.node_parent.data.all()
             == np.array([-1, 0, 0, 2, 2, 4, 4, -1]).all()
         )
+        assert (
+            permuted_tree.node_left_child.data.all()
+            == np.array([1, -1, 3, -1, 5, -1, -1, 0]).all()
+        )
+        assert (
+            permuted_tree.node_right_sib.data.all()
+            == np.array([-1, 3, -1, 5, -1, 6, -1, -1]).all()
+        )
+        assert permuted_tree.sample_node.data.all() == np.array([1, 3, 5, 6]).all()
 
     def generate_trees():
         for i in range(10, 20):
@@ -65,7 +77,7 @@ class TestPermuteTree:
             reversed_permuted.traversal_postorder.data.all()
             == tree.traversal_postorder.data.all()
         )
-        assert reversed_permuted.samples.data.all() == tree.samples.data.all()
+        assert reversed_permuted.sample_node.data.all() == tree.sample_node.data.all()
 
     @pytest.mark.parametrize(("tsk_tree"), generate_trees())
     def test_permute_tree_error(self, tsk_tree):

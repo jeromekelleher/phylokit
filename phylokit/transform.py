@@ -44,5 +44,5 @@ def permute_tree(ds, ordering):
         parent=_permute_node_seq(ds.node_parent.data, ordering, reversed_map),
         left_child=_permute_node_seq(ds.node_left_child.data, ordering, reversed_map),
         right_sib=_permute_node_seq(ds.node_right_sib.data, ordering, reversed_map),
-        samples=np.array([reversed_map[s] for s in ds.samples.data]),
+        samples=np.array([reversed_map[s] for s in ds.sample_node.data]),
     )
