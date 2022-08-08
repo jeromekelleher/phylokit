@@ -10,13 +10,11 @@ from .distance import kc_distance
 from .distance import mrca
 from .distance import rf_distance
 from .transform import permute_tree
-from .traversal import _postorder
-from .traversal import _preorder
 from .traversal import postorder
 from .traversal import preorder
-from .util import _get_node_branch_length
 from .util import check_node_bounds
 from .util import get_node_branch_length
+from .util import get_node_time
 from .util import get_num_roots
 from .util import is_unary
 
@@ -35,12 +33,10 @@ __all__ = [
     "rf_distance",
     "postorder",
     "preorder",
-    "_preorder",
-    "_postorder",
     "is_unary",
     "get_num_roots",
     "get_node_branch_length",
-    "_get_node_branch_length",
     "check_node_bounds",
     "permute_tree",
+    "get_node_time",
 ]

@@ -3,6 +3,7 @@ import xarray
 from .traversal import _postorder
 from .traversal import _preorder
 from .util import _get_node_branch_length
+from .util import _get_node_time
 
 DIM_NODE = "nodes"
 DIM_TRAVERSAL = "traversal"
@@ -32,27 +33,25 @@ def create_tree_dataset(
     if preorder is not None:
         data_vars["traversal_preorder"] = ([DIM_TRAVERSAL], preorder)
     else:
-        data_vars["traversal_preorder"] = (
-            [DIM_TRAVERSAL],
-            _preorder(parent, left_child, right_sib, -1),
-        )
+        preorder = _preorder(parent, left_child, right_sib, -1)
+        data_vars["traversal_preorder"] = ([DIM_TRAVERSAL], preorder)
     if postorder is not None:
         data_vars["traversal_postorder"] = ([DIM_TRAVERSAL], postorder)
     else:
-        data_vars["traversal_postorder"] = (
-            [DIM_TRAVERSAL],
-            _postorder(left_child, right_sib, -1),
-        )
+        postorder = _postorder(left_child, right_sib, -1)
+        data_vars["traversal_postorder"] = ([DIM_TRAVERSAL], postorder)
     if time is not None:
+        data_vars["node_time"] = ([DIM_NODE], time)
+    else:
+        time = _get_node_time(postorder, left_child, right_sib)
         data_vars["node_time"] = ([DIM_NODE], time)
     if branch_length is not None:
         data_vars["node_branch_length"] = ([DIM_NODE], branch_length)
     else:
-        if time is not None:
-            data_vars["node_branch_length"] = (
-                [DIM_NODE],
-                _get_node_branch_length(parent, time),
-            )
+        data_vars["node_branch_length"] = (
+            [DIM_NODE],
+            _get_node_branch_length(parent, time),
+        )
     # TODO should sample_id be a dimension instead so that we support
     # direct indexing on it?
     if sample_id is not None:

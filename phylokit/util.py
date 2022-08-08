@@ -103,3 +103,32 @@ def get_node_branch_length(ds):
     :rtype: numpy.ndarray
     """
     return _get_node_branch_length(ds.node_parent.data, ds.node_time.data)
+
+
+@jit.numba_njit
+def _get_node_time(postorder, left_child, right_sib):
+    ret = np.zeros_like(left_child)
+    for u in postorder:
+        v = left_child[u]
+        if v == -1:
+            ret[u] = 0
+        else:
+            m = ret[v]
+            while v != -1:
+                v = right_sib[v]
+                m = max(m, ret[v])
+            ret[u] = m + 1
+    return ret
+
+
+def get_node_time(ds):
+    """
+    Returns the time of each node in the tree.
+
+    :param xarray.DataSet ds: The tree dataset.
+    :return: The time of each node.
+    :rtype: numpy.ndarray
+    """
+    return _get_node_time(
+        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+    )
