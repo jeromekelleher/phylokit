@@ -233,6 +233,16 @@ class TestRFDistance:
     def setup_method(self):
         self.taxon_namespace = dendropy.TaxonNamespace()
 
+    def get_non_consecutive_leaf_tree(self):
+        tables = tskit.Tree.generate_balanced(3).tree_sequence.dump_tables()
+        tables.nodes.add_row(time=-1)
+        tables.nodes.add_row(time=-1)
+        edges = tables.edges
+        edges.add_row(left=0, right=1, parent=0, child=5)
+        edges.add_row(left=0, right=1, parent=0, child=6)
+        tables.sort()
+        return tables.tree_sequence().first()
+
     def to_dendropy(self, newick_data):
         return dendropy.Tree.get(
             data=newick_data,
@@ -259,3 +269,8 @@ class TestRFDistance:
         ) == dendropy.calculate.treecompare.symmetric_difference(
             dendropy_tree1, dendropy_tree2
         )
+
+    def test_rf_leaves_non_consecutive_leaves(self):
+        t1 = self.get_non_consecutive_leaf_tree()
+        t2 = tskit.Tree.generate_balanced(4)
+        assert pk.rf_distance(pk.from_tskit(t1), pk.from_tskit(t2)) == 10
