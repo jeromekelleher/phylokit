@@ -11,6 +11,9 @@ from .dataset import save_dataset
 from .distance import kc_distance
 from .distance import mrca
 from .distance import rf_distance
+from .parsimony.hartigan import append_parsimony_score
+from .parsimony.hartigan import get_hartigan_parsimony_score
+from .parsimony.hartigan import numba_hartigan_parsimony_vectorised
 from .transform import permute_tree
 from .traversal import _postorder
 from .traversal import _preorder
@@ -47,4 +50,7 @@ __all__ = [
     "permute_tree",
     "open_dataset",
     "save_dataset",
+    "numba_hartigan_parsimony_vectorised",
+    "get_hartigan_parsimony_score",
+    "append_parsimony_score",
 ]
