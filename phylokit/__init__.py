@@ -6,6 +6,8 @@ from .convert import from_newick  # NOQA
 from .convert import from_tskit  # NOQA
 from .convert import to_newick  # NOQA
 from .convert import to_tskit  # NOQA
+from .dataset import open_dataset
+from .dataset import save_dataset
 from .distance import kc_distance
 from .distance import mrca
 from .distance import rf_distance
@@ -43,4 +45,6 @@ __all__ = [
     "_get_node_branch_length",
     "check_node_bounds",
     "permute_tree",
+    "open_dataset",
+    "save_dataset",
 ]
