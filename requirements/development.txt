@@ -6,3 +6,5 @@ tskit
 msprime
 sgkit
 scipy
+xarray
+bokeh
