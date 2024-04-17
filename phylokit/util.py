@@ -88,7 +88,7 @@ def branch_length(ds, u):
 
 @jit.numba_njit
 def _get_node_branch_length(parent, time):
-    ret = np.zeros_like(parent)
+    ret = np.zeros_like(parent, dtype=np.float64)
     for i in range(parent.shape[0]):
         ret[i] = _branch_length(parent, time, i)
     return ret
