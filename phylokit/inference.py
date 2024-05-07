@@ -7,7 +7,7 @@ from . import core
 from . import jit
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _linkage_matrix_to_dataset(Z):
     n = Z.shape[0] + 1
     N = 2 * n

@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 
@@ -30,8 +31,16 @@ DEFAULT_NUMBA_ARGS = {
 }
 
 
-def numba_njit(func, **kwargs):
-    if ENABLE_NUMBA:  # pragma: no cover
-        return numba.jit(func, **{**DEFAULT_NUMBA_ARGS, **kwargs})
-    else:
-        return func
+def numba_njit(**numba_kwargs):
+    def _numba_njit(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)  # pragma: no cover
+
+        if ENABLE_NUMBA:  # pragma: no cover
+            combined_kwargs = {**DEFAULT_NUMBA_ARGS, **numba_kwargs}
+            return numba.jit(**combined_kwargs)(func)
+        else:
+            return func
+
+    return _numba_njit

@@ -4,7 +4,7 @@ from numba import prange
 from . import jit
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _is_unary(postorder, left_child, right_sib):
     for u in postorder:
         v = left_child[u]
@@ -45,7 +45,7 @@ def check_node_bounds(ds, *args):
             raise ValueError(f"Node {u} is not in the tree")
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _get_num_roots(left_child, right_sib):
     u = left_child[-1]
     num_roots = 0
@@ -66,7 +66,7 @@ def get_num_roots(ds):
     return _get_num_roots(ds.node_left_child.data, ds.node_right_sib.data)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _branch_length(parent, time, u):
     ret = 0
     p = parent[u]
@@ -89,7 +89,7 @@ def branch_length(ds, u):
     return _branch_length(ds.node_parent.data, ds.node_time.data, u)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _get_node_branch_length(parent, time):
     ret = np.zeros_like(parent, dtype=np.float64)
     for i in range(parent.shape[0]):
@@ -132,6 +132,3 @@ def base_mapping(base_matrix, mapper_matrix):
                 result_matrix[i] = j
                 break
     return result_matrix.reshape(base_shape)
-
-
-base_mapping = jit.numba_njit(base_mapping, parallel=True)

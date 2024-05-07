@@ -7,7 +7,7 @@ from . import jit
 from . import util
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _sackin_index(virtual_root, left_child, right_sib):
     stack = []
     root = left_child[virtual_root]
@@ -43,7 +43,7 @@ def sackin_index(ds):
     return _sackin_index(-1, ds.node_left_child.data, ds.node_right_sib.data)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _colless_index(postorder, left_child, right_sib):
     num_leaves = np.zeros_like(left_child)
     total = 0.0
@@ -83,11 +83,13 @@ def colless_index(ds):
     if util.get_num_roots(ds) != 1:
         raise ValueError("Colless index not defined for multiroot trees")
     return _colless_index(
-        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+        ds.traversal_postorder.data,
+        ds.node_left_child.data,
+        ds.node_right_sib.data,
     )
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _b1_index(postorder, left_child, right_sib, parent):
     max_path_length = np.zeros_like(postorder)
     total = 0.0
@@ -121,7 +123,7 @@ def b1_index(ds):
     )
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def general_log(x, base):
     """
     Compute the logarithm of x in base `base`.
@@ -134,7 +136,7 @@ def general_log(x, base):
     return math.log(x) / math.log(base)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _b2_index(virtual_root, left_child, right_sib, base):
     root = left_child[virtual_root]
     stack = [(root, 1)]
