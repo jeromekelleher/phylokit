@@ -5,7 +5,7 @@ from . import jit
 from . import util
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _permute_node_seq(nodes, ordering, reversed_map):
     ret = np.zeros_like(nodes, dtype=np.int32)
     for u, v in enumerate(ordering):

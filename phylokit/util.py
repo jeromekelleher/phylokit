@@ -1,9 +1,10 @@
 import numpy as np
+from numba import prange
 
 from . import jit
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _is_unary(postorder, left_child, right_sib):
     for u in postorder:
         v = left_child[u]
@@ -24,7 +25,9 @@ def is_unary(ds):
     :rtype : bool
     """
     return _is_unary(
-        ds.traversal_postorder.data, ds.node_left_child.data, ds.node_right_sib.data
+        ds.traversal_postorder.data,
+        ds.node_left_child.data,
+        ds.node_right_sib.data,
     )
 
 
@@ -42,7 +45,7 @@ def check_node_bounds(ds, *args):
             raise ValueError(f"Node {u} is not in the tree")
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _get_num_roots(left_child, right_sib):
     u = left_child[-1]
     num_roots = 0
@@ -63,7 +66,7 @@ def get_num_roots(ds):
     return _get_num_roots(ds.node_left_child.data, ds.node_right_sib.data)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _branch_length(parent, time, u):
     ret = 0
     p = parent[u]
@@ -86,9 +89,9 @@ def branch_length(ds, u):
     return _branch_length(ds.node_parent.data, ds.node_time.data, u)
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _get_node_branch_length(parent, time):
-    ret = np.zeros_like(parent)
+    ret = np.zeros_like(parent, dtype=np.float64)
     for i in range(parent.shape[0]):
         ret[i] = _branch_length(parent, time, i)
     return ret
@@ -103,3 +106,29 @@ def get_node_branch_length(ds):
     :rtype: numpy.ndarray
     """
     return _get_node_branch_length(ds.node_parent.data, ds.node_time.data)
+
+
+@jit.numba_njit(parallel=True)
+def base_mapping(base_matrix, mapper_matrix):
+    """
+    Convert the base matrix with the mapper matrix.
+
+    For example:
+        base_matrix = [[b'A', b'C'], [b'C', b'G']]
+        mapper_matrix = [b'A', b'C', b'G', b'T']
+
+        result_matrix = [[0, 1], [1, 2]]
+
+    :param numpy.ndarray base_matrix: The base matrix to convert.
+    :param numpy.ndarray mapping_matrix: The mapping matrix.
+    :return: The converted matrix.
+    """
+    base_shape = base_matrix.shape
+    base_matrix = base_matrix.flatten()
+    result_matrix = np.zeros_like(base_matrix, dtype=np.int8)
+    for i in prange(base_matrix.shape[0]):
+        for j in range(mapper_matrix.shape[0]):
+            if base_matrix[i] == mapper_matrix[j]:
+                result_matrix[i] = j
+                break
+    return result_matrix.reshape(base_shape)

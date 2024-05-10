@@ -3,7 +3,7 @@ import numpy as np
 from . import jit
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _postorder(left_child, right_sib, root):
     # Another implementation with python stack operations such as `pop`
     # makes the same function about 2X slower.
@@ -59,7 +59,7 @@ def postorder(ds, root=None):
     )
 
 
-@jit.numba_njit
+@jit.numba_njit()
 def _preorder(parent, left_child, right_sib, root):
     # Another implementation with python stack operations such as `pop`
     # makes the same function about 2X slower.

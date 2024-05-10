@@ -11,6 +11,7 @@ from .dataset import save_dataset
 from .distance import kc_distance
 from .distance import mrca
 from .distance import rf_distance
+from .maximum_likelihood.felsenstein import likelihood_felsenstein
 from .parsimony.hartigan import append_parsimony_score
 from .parsimony.hartigan import get_hartigan_parsimony_score
 from .parsimony.hartigan import numba_hartigan_parsimony_vectorised
@@ -53,4 +54,5 @@ __all__ = [
     "numba_hartigan_parsimony_vectorised",
     "get_hartigan_parsimony_score",
     "append_parsimony_score",
+    "likelihood_felsenstein",
 ]
