@@ -1,0 +1,39 @@
+# The prek configuration defining linting requirements. Run with
+# `uv run prek run --all-files`.
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-added-large-files" },
+    { id = "check-merge-conflict" },
+    { id = "mixed-line-ending" },
+    { id = "check-case-conflict" },
+    { id = "check-yaml" },
+    { id = "check-toml" },
+]
+
+[[repos]]
+repo = "https://github.com/benjeffery/pre-commit-copyright-year"
+rev = "c62dcbb78f724162e14197f8fa264eaa8c3aad49"
+hooks = [
+    { id = "copyright-year" },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "ruff-check",
+    name = "ruff check",
+    language = "system",
+    entry = "uv run --only-group=lint ruff check --fix --force-exclude",
+    types = ["python"],
+  },
+  {
+    id = "ruff-format",
+    name = "ruff format",
+    language = "system",
+    entry = "uv run --only-group=lint ruff format --force-exclude",
+    types = ["python"],
+  },
+]

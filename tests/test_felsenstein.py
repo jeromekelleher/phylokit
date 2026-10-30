@@ -8,7 +8,6 @@ from phylokit.maximum_likelihood import felsenstein
 
 
 class TestFelsensteinML:
-
     def ts_to_dataset(self, ts, samples=None):
         """
         Convert the specified tskit tree sequence into an sgkit dataset.

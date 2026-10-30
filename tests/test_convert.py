@@ -80,7 +80,7 @@ class TestFromNewick:
             # FIXME This is a stupid way to do it, but works until we figure out the
             # right way to do indexing by sample name.
             sample_index = np.where(np.array(ds.sample_id) == sample_id)[0]
-            pk_u = int(ds.sample_node[sample_index])
+            pk_u = ds.sample_node[sample_index].item()
             path_pk = pk_path_to_root(ds, pk_u)
             path_tsk = tsk_path_to_root(tsk_tree, tsk_u)
             assert path_pk.shape == path_tsk.shape
