@@ -1,9 +1,104 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "phylokit"
+version = "0.0.1a1"
+description = "Experimental, do not use!"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Phylokit Developers" },
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fsspec",
+    "newick",
+    "numba>=0.63",
+    "numpy>=2",
+    "scipy",
+    "sgkit>=0.9",
+    "tskit>=1.0",
+    "xarray",
+    "zarr>=3",
+]
+
+[project.urls]
+Homepage = "https://github.com/jeromekelleher/phylokit"
+"Bug Tracker" = "https://github.com/jeromekelleher/phylokit/issues"
+
+[dependency-groups]
+test = [
+    "coverage",
+    "coveralls",
+    "dendropy",
+    "msprime",
+    "pytest",
+    "pytest-xdist",
+]
+lint = [
+    "prek==0.5.9",
+    "ruff==0.17.3",
+]
+notebooks = [
+    "bokeh",
+    "jupyter",
+]
+packaging = [
+    "twine",
+    "validate-pyproject[all]",
+]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+    { include-group = "notebooks" },
+    { include-group = "packaging" },
+]
+
+[tool.uv]
+required-version = ">=0.12.10"
+
+[tool.uv.sources]
+# The latest sgkit release (0.10.0) pins numpy<2.2 and dask<=2024.8, which
+# rules out Python 3.14. Track sgkit main until a release relaxes those pins.
+sgkit = { git = "https://github.com/sgkit-dev/sgkit", rev = "e18c2066e369479898f790a7d8b7e78a5ca4cca8" }
+
+[tool.setuptools.packages.find]
+include = ["phylokit", "phylokit.*"]
 
 [tool.pytest.ini_options]
 addopts = "-n 4"
 testpaths = [
     "tests",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I", "N", "UP", "A", "PT", "C4", "T10"]
+ignore = [
+    "B905", # Don't add strict=False to zips
+    "N803", "N806", # Uppercase argument and variable names, e.g. for matrices
+    "PT011", # `pytest.raises(ValueError)` is too broad
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["phylokit"]
