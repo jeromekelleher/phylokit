@@ -76,7 +76,7 @@ class TestBalancedBinaryEven:
 
     @pytest.mark.parametrize("base", [0, -0.001, -1, -1e-6, -1e200])
     def test_b2_bad_base(self, base):
-        with pytest.raises(ValueError, match="math domain"):
+        with pytest.raises(ValueError, match="math domain|expected a positive input"):
             pk.b2_index(self.tree(), base=base)
 
     def test_b2_base1(self):

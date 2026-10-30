@@ -2,6 +2,7 @@ import msprime
 import numpy as np
 import pytest
 import xarray as xr
+import zarr
 
 import phylokit as pk
 
@@ -34,5 +35,35 @@ class TestCreateTreeDataset:
     def test_save_and_open_dataset_str(self, ds, tmp_path):
         path = str(tmp_path / "test.zarr")
         pk.save_dataset(ds, path)
+        ds2 = pk.open_dataset(path)
+        xr.testing.assert_identical(ds, ds2)
+
+    @pytest.mark.parametrize("ds", create_test_tree_dataset()[:1])
+    def test_save_and_open_dataset_empty_storage_options(self, ds, tmp_path):
+        path = str(tmp_path / "test.zarr")
+        pk.save_dataset(ds, path, storage_options={})
+        ds2 = pk.open_dataset(path, storage_options={})
+        xr.testing.assert_identical(ds, ds2)
+
+    @pytest.mark.parametrize("ds", create_test_tree_dataset()[:1])
+    def test_save_and_open_dataset_url_storage_options(self, ds, tmp_path):
+        url = (tmp_path / "test.zarr").as_uri()
+        storage_options = {"auto_mkdir": True}
+        pk.save_dataset(ds, url, storage_options=storage_options)
+        ds2 = pk.open_dataset(url, storage_options=storage_options)
+        xr.testing.assert_identical(ds, ds2)
+
+    @pytest.mark.parametrize("ds", create_test_tree_dataset()[:1])
+    def test_save_dataset_default_zarr_format(self, ds, tmp_path):
+        path = tmp_path / "test.zarr"
+        pk.save_dataset(ds, path)
+        assert zarr.open_group(path, mode="r").metadata.zarr_format == 2
+
+    @pytest.mark.filterwarnings("ignore::zarr.errors.ZarrUserWarning")
+    @pytest.mark.parametrize("ds", create_test_tree_dataset()[:1])
+    def test_save_and_open_dataset_zarr_format_3(self, ds, tmp_path):
+        path = tmp_path / "test.zarr"
+        pk.save_dataset(ds, path, zarr_format=3)
+        assert zarr.open_group(path, mode="r").metadata.zarr_format == 3
         ds2 = pk.open_dataset(path)
         xr.testing.assert_identical(ds, ds2)
