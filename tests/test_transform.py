@@ -67,7 +67,7 @@ class TestPermuteTree:
         for i in range(10, 20):
             yield tskit.Tree.generate_random_binary(10, random_seed=i)
 
-    @pytest.mark.parametrize(("tsk_tree"), generate_trees())
+    @pytest.mark.parametrize(("tsk_tree"), list(generate_trees()))
     def test_permute_trees(self, tsk_tree):
         tree = pk.from_tskit(tsk_tree)
         original_ordering = np.append(
@@ -100,7 +100,7 @@ class TestPermuteTree:
             tree.sample_node.data,
         )
 
-    @pytest.mark.parametrize(("tsk_tree"), generate_trees())
+    @pytest.mark.parametrize(("tsk_tree"), list(generate_trees()))
     def test_permute_tree_error(self, tsk_tree):
         permuted = pk.from_tskit(tsk_tree)
         ordering = permuted.traversal_preorder.data

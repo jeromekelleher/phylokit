@@ -13,7 +13,7 @@ def simulate_ts(num_samples, num_sites, seed=1234):
     return msprime.sim_mutations(tsa, rate=0.01, random_seed=seed)
 
 
-class Test_Hartigan_Parsimony_Vectorised:
+class TestHartiganParsimonyVectorised:
     def generate_test_tree_ts():
         trees = []
         for i in range(1, 6):

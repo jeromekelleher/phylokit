@@ -257,7 +257,7 @@ class TestRFDistance:
 
     @pytest.mark.parametrize(
         ("tree1", "tree2"),
-        itertools.combinations(generate_trees(), 2),
+        list(itertools.combinations(generate_trees(), 2)),
     )
     def test_rf_distance(self, tree1, tree2):
         pk_tree1 = pk.from_tskit(tree1)
